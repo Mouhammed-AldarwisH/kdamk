@@ -11,6 +11,5 @@ function checkHouse(event) {
     } else {
         resultDiv.textContent = "اسم البيت غير صحيح";
         resultDiv.style.color = "red";
-    }
-}
+    
     
