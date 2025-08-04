@@ -170,7 +170,7 @@ $(document).ready(function() {
 
     function fetchUsersByHome(houseId) {
         // استخدم الدالة من users_by_home.js بدلاً من AJAX PHP
-        window.fetchUsersByHome(houseId).then(response => {
+        fetchUsersByHome(houseId).then(response => {
             if (response.status === 'success' && Array.isArray(response.users)) {
                 var grid = $('.options-grid');
                 grid.empty();
