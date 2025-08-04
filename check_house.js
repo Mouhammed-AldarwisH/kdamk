@@ -1,5 +1,5 @@
 // التحقق من وجود اسم البيت في قاعدة البيانات Supabase
-async function checkHouseName(houseName) {
+async function checkHouse(houseName) {
     const apiKey = window.SUPABASE_ANON_KEY;
     const url = `https://akvyhsmobalbqfcjupdq.supabase.co/rest/v1/homes?name=eq.${encodeURIComponent(houseName)}`;
     const res = await fetch(url, {
