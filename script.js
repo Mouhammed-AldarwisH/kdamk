@@ -148,28 +148,7 @@ $(document).ready(function() {
 
     $('#loginForm').on('submit', function(e) {
         e.preventDefault();
-        const houseName = $('#houseName').val().trim();
-        if (houseName === '') {
-            $('#error-message').text(translations[currentLang].enterHouseName || 'الرجاء إدخال اسم البيت');
-            return;
-        }
-        $.ajax({
-            type: 'POST',
-            url: 'login.php',
-            data: { houseName: houseName },
-            success: function(response) {
-                if (response.success) {
-                    if (response.houseId) {
-                        localStorage.setItem('houseId', response.houseId);
-                    }
-                } else {
-                    $('#error-message').text(translations[currentLang].wrongHouseName || 'اسم البيت غير صحيح');
-                }
-            },
-            error: function() {
-                $('#error-message').text(translations[currentLang].connectionError || 'حدث خطأ في الاتصال');
-            }
-        });
+        checkHouse(e); // استخدم الدالة من index.js مباشرة
     });
 
     // تحقق إذا كان المستخدم مسجل دخول (houseId موجود)
@@ -190,57 +169,48 @@ $(document).ready(function() {
     }
 
     function fetchUsersByHome(houseId) {
-        // تأكد من أن قائمة المستخدمين ظاهرة قبل جلب البيانات
-        $('.options-grid').show();
-        $('.overlay-content h3').show();
-        
-        $.ajax({
-            url: 'users_by_home.php',
-            method: 'POST',
-            data: { houseId: houseId },
-            success: function(response) {
-                if (response.status === 'success' && Array.isArray(response.users)) {
-                    var grid = $('.options-grid');
-                    grid.empty();
-                    response.users.forEach(function(user) {
-                        grid.append('<div class="option-box" data-userid="' + user.id + '">' + user.name + '</div>');
-                    });
-                    // إضافة مستمع للنقر على اسم المستخدم
-                    $('.option-box').click(function() {
-                        var userId = $(this).data('userid');
-                        localStorage.setItem('selectedUserId', userId);
-                        // إزالة أي تأكيد سابق
-                        $('.confirm-user').remove();
-                        // إضافة خانة التأكيد أسفل قائمة المستخدمين مع ترجمة النصوص
-                        grid.after(`
-                            <div class="confirm-user" style="margin-top:20px;">
-                                <div style="margin-bottom:12px;font-size:16px;">${translations[currentLang].confirm}</div>
-                                <button id="confirmYes" style="background:#28a745;color:#fff;padding:10px 24px;border:none;border-radius:8px;margin-right:10px;font-size:15px;cursor:pointer;">${translations[currentLang].yes}</button>
-                                <button id="confirmNo" style="background:#dc3545;color:#fff;padding:10px 24px;border:none;border-radius:8px;font-size:15px;cursor:pointer;">${translations[currentLang].no}</button>
-                            </div>
-                        `);
-                        // زر نعم: يبقي الـ id محفوظ فقط
-                        $('#confirmYes').click(function() {
-                            $('.confirm-user').remove();
-                            var userId = localStorage.getItem('selectedUserId');
-                            showUserActions(userId); // عرض الأزرار حسب الدور
-                            // يمكنك هنا إضافة أي إجراء إضافي بعد التأكيد
-                        });
-                        // زر لا: يحذف الـ id ويخفي التأكيد
-                        $('#confirmNo').click(function() {
-                            localStorage.removeItem('selectedUserId');
-                            $('.confirm-user').remove();
-                        });
-                    });
-                } else {
-                    $('.options-grid').html('<div>' + translations[currentLang].noUsers + '</div>');
+        // استخدم الدالة من users_by_home.js بدلاً من AJAX PHP
+        window.fetchUsersByHome(houseId).then(response => {
+            if (response.status === 'success' && Array.isArray(response.users)) {
+                var grid = $('.options-grid');
+                grid.empty();
+                response.users.forEach(function(user) {
+                    grid.append('<div class="option-box" data-userid="' + user.id + '">' + user.name + '</div>');
+                });
+                // إضافة مستمع للنقر على اسم المستخدم
+                $('.option-box').click(function() {
+                    var userId = $(this).data('userid');
+                    localStorage.setItem('selectedUserId', userId);
+                    // إزالة أي تأكيد سابق
                     $('.confirm-user').remove();
-                }
-            },
-            error: function() {
-                $('.options-grid').html('<div>' + translations[currentLang].fetchError + '</div>');
+                    // إضافة خانة التأكيد أسفل قائمة المستخدمين مع ترجمة النصوص
+                    grid.after(`
+                        <div class="confirm-user" style="margin-top:20px;">
+                            <div style="margin-bottom:12px;font-size:16px;">${translations[currentLang].confirm}</div>
+                            <button id="confirmYes" style="background:#28a745;color:#fff;padding:10px 24px;border:none;border-radius:8px;margin-right:10px;font-size:15px;cursor:pointer;">${translations[currentLang].yes}</button>
+                            <button id="confirmNo" style="background:#dc3545;color:#fff;padding:10px 24px;border:none;border-radius:8px;font-size:15px;cursor:pointer;">${translations[currentLang].no}</button>
+                        </div>
+                    `);
+                    // زر نعم: يبقي الـ id محفوظ فقط
+                    $('#confirmYes').click(function() {
+                        $('.confirm-user').remove();
+                        var userId = localStorage.getItem('selectedUserId');
+                        showUserActions(userId); // عرض الأزرار حسب الدور
+                        // يمكنك هنا إضافة أي إجراء إضافي بعد التأكيد
+                    });
+                    // زر لا: يحذف الـ id ويخفي التأكيد
+                    $('#confirmNo').click(function() {
+                        localStorage.removeItem('selectedUserId');
+                        $('.confirm-user').remove();
+                    });
+                });
+            } else {
+                $('.options-grid').html('<div>' + translations[currentLang].noUsers + '</div>');
                 $('.confirm-user').remove();
             }
+        }).catch(() => {
+            $('.options-grid').html('<div>' + translations[currentLang].fetchError + '</div>');
+            $('.confirm-user').remove();
         });
     }
 
@@ -354,3 +324,32 @@ $(document).ready(function() {
     window.checkHouse = checkHouse;
 
 }); // <-- نهاية $(document).ready
+    function checkHouse(event) {
+        event.preventDefault();
+        const houseName = $('#houseName').val().trim();
+        if (houseName === '') {
+            $('#result-message').text(translations[currentLang].enterHouseName || 'الرجاء إدخال اسم البيت').addClass('error');
+            return;
+        }
+        $.ajax({
+            type: 'POST',
+            url: 'check_house.php',
+            data: { houseName: houseName },
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#result-message').text(response.message).removeClass('error').addClass('success');
+                    localStorage.setItem('houseId', response.houseId);
+                    location.reload(); // Reload to show the overlay
+                } else {
+                    $('#result-message').text(response.message).removeClass('success').addClass('error');
+                }
+            },
+            error: function() {
+                $('#result-message').text(translations[currentLang].connectionError || 'حدث خطأ في الاتصال').removeClass('success').addClass('error');
+            }
+        });
+    }
+
+    // Expose checkHouse to global scope for inline onsubmit
+    window.checkHouse = checkHouse;
+

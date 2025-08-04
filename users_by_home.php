@@ -1,6 +1,6 @@
 <?php
-header('Content-Type: application/json');
-
+// لم يعد هناك حاجة لهذا الملف بعد نقل الجلب إلى جافاسكريبت
+?>
 if (!isset($_POST['houseId'])) {
     echo json_encode(['status' => 'error', 'message' => 'لم يتم إرسال معرف البيت']);
     exit;
