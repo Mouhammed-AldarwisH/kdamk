@@ -13,5 +13,4 @@ function checkHouse(event) {
         resultDiv.style.color = "red";
     }
 }
-    }
-}
+    
