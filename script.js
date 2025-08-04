@@ -217,7 +217,7 @@ $(document).ready(function() {
     function showUserActions(userId) {
         // جلب بيانات المستخدم من قاعدة البيانات
         $.ajax({
-            url: 'get_user.php',
+            url: 'get_user.js',
             method: 'POST',
             data: { userId: userId },
             success: function(response) {
