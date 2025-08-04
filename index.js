@@ -1,5 +1,5 @@
 // التحقق من اسم البيت عبر جافاسكريبت (مثال: اسم البيت الصحيح هو "test_house")
-function checkHouse(event) {
+function checkHouse1(event) {
     event.preventDefault();
     const houseName = document.getElementById('houseName').value.trim();
     const resultDiv = document.getElementById('result-message');
