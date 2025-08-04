@@ -294,18 +294,19 @@ $(document).ready(function() {
         });
     }
 
-    function checkHouse(event) {
+    // استبدل دالة checkHouse لتستخدم checkHouseName من check_house.js
+    async function checkHouse(event) {
         event.preventDefault();
         const houseName = $('#houseName').val().trim();
         if (houseName === '') {
             $('#result-message').text(translations[currentLang].enterHouseName || 'الرجاء إدخال اسم البيت').addClass('error');
             return;
         }
-        $.ajax({
-            type: 'POST',
-            url: 'check_house.php',
-            data: { houseName: houseName },
-            success: function(response) {
+        // استخدم checkHouseName من check_house.js
+        if (typeof window.checkHouseName === 'function') {
+            $('#result-message').text('...').removeClass('error success');
+            try {
+                const response = await window.checkHouseName(houseName);
                 if (response.status === 'success') {
                     $('#result-message').text(response.message).removeClass('error').addClass('success');
                     localStorage.setItem('houseId', response.houseId);
@@ -313,11 +314,12 @@ $(document).ready(function() {
                 } else {
                     $('#result-message').text(response.message).removeClass('success').addClass('error');
                 }
-            },
-            error: function() {
+            } catch (err) {
                 $('#result-message').text(translations[currentLang].connectionError || 'حدث خطأ في الاتصال').removeClass('success').addClass('error');
             }
-        });
+        } else {
+            $('#result-message').text('checkHouseName function not found').addClass('error');
+        }
     }
 
     // Expose checkHouse to global scope for inline onsubmit
